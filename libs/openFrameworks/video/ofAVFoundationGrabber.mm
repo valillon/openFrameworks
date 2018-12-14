@@ -171,8 +171,16 @@
 		[self.captureSession beginConfiguration];
 
 		// We add input and output
-		[self.captureSession addInput:captureInput];
-		[self.captureSession addOutput:captureOutput];
+		if([self.captureSession canAddInput:captureInput]){
+			[self.captureSession addInput:captureInput];
+		}else{
+			ofLogError("ofAvFoundationGrabber") << "Input device not available for capturing";
+		}
+		if([self.captureSession canAddOutput:captureOutput]){
+			[self.captureSession addOutput:captureOutput];
+		}else{
+			ofLogError("ofAvFoundationGrabber") << "Output device not available for capturing";
+		}
 
 		// We specify a minimum duration for each frame (play with this settings to avoid having too many frames waiting
 		// in the queue because it can cause memory issues). It is similar to the inverse of the maximum framerate.
