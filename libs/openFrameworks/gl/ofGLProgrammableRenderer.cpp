@@ -1289,18 +1289,17 @@ void ofGLProgrammableRenderer::unbind(const ofShader & shader){
 	beginDefaultShader();
 }
 
-
 //----------------------------------------------------------
-void ofGLProgrammableRenderer::begin(const ofFbo & fbo, ofFboBeginMode mode){
+void ofGLProgrammableRenderer::begin(const ofFbo & fbo, ofFboMode mode){
 	pushView();
     pushStyle();
-    if(mode & ofFboBeginMode::MatrixFlip){
+    if(mode & OF_FBOMODE_MATRIXFLIP){
         matrixStack.setRenderSurface(fbo);
     }else{
         matrixStack.setRenderSurfaceNoMatrixFlip(fbo);
     }
 	viewport();
-    if(mode & ofFboBeginMode::Perspective){
+    if(mode & OF_FBOMODE_PERSPECTIVE){
 		setupScreenPerspective();
 	}else{
 		uploadMatrices();
@@ -1752,9 +1751,9 @@ void ofGLProgrammableRenderer::drawString(string textString, float x, float y, f
 			
 			rViewport = getCurrentViewport();
 			
-			auto mat = matrixStack.getProjectionMatrixNoOrientation()  * matrixStack.getModelViewMatrix();
-			auto dScreen4 = mat * glm::vec4(x,y,z,1.0);
-			auto dScreen = dScreen4.xyz() / dScreen4.w;
+			glm::mat4 mat = matrixStack.getProjectionMatrixNoOrientation()  * matrixStack.getModelViewMatrix();
+			glm::vec4 dScreen4 = mat * glm::vec4(x,y,z,1.0);
+			glm::vec3 dScreen = glm::vec3(dScreen4) / dScreen4.w;
 			dScreen += glm::vec3(1.0) ;
 			dScreen *= 0.5;
 			
@@ -2387,6 +2386,7 @@ void ofGLProgrammableRenderer::setup(int _major, int _minor){
 	GLint currentFrameBuffer;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFrameBuffer);
 	defaultFramebufferId = currentFrameBuffer;
+    currentFramebufferId = defaultFramebufferId;
 #endif
 
 	major = _major;
@@ -2398,8 +2398,8 @@ void ofGLProgrammableRenderer::setup(int _major, int _minor){
 #endif
 
 	if(uniqueShader){
-		defaultUniqueShader.setupShaderFromSource(GL_VERTEX_SHADER,uniqueVertexShader);
-		defaultUniqueShader.setupShaderFromSource(GL_FRAGMENT_SHADER,uniqueFragmentShader);
+		defaultUniqueShader.setupShaderFromSource(GL_VERTEX_SHADER,shaderSource(uniqueVertexShader, major, minor));
+		defaultUniqueShader.setupShaderFromSource(GL_FRAGMENT_SHADER,shaderSource(uniqueFragmentShader, major, minor));
 		defaultUniqueShader.bindDefaults();
 		defaultUniqueShader.linkProgram();
 		beginDefaultShader();
@@ -2641,7 +2641,7 @@ void ofGLProgrammableRenderer::saveScreen(int x, int y, int w, int h, ofPixels &
 	}
 	auto pixelFormat = OF_PIXELS_BGRA;
 	pixels.allocate(w, h, pixelFormat);
-	auto glFormat = ofGetGlFormat(pixels);
+	auto glFormat = ofGetGLFormat(pixels);
 
 
 	ofBufferObject buffer;

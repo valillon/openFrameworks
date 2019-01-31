@@ -151,7 +151,7 @@ glm::mat4 ofCamera::getProjectionMatrix(const ofRectangle & viewport) const {
 	const_cast<ofCamera*>(this)->calcClipPlanes(viewport);
 
 	if(isOrtho) {
-		return glm::ortho(
+		return glm::translate(glm::mat4(), {-lensOffset.x, -lensOffset.y, 0.f}) * glm::ortho(
 			- viewport.width/2,
 			+ viewport.width/2,
 			- viewport.height/2,
@@ -207,7 +207,7 @@ glm::vec3 ofCamera::worldToCamera(glm::vec3 WorldXYZ, const ofRectangle & viewpo
 		MVPmatrix = glm::scale(glm::mat4(1.0), glm::vec3(1.f,-1.f,1.f)) * MVPmatrix;
 	}
 	auto camera = MVPmatrix * glm::vec4(WorldXYZ, 1.0);
-	return camera.xyz() / camera.w;
+	return glm::vec3(camera) / camera.w;
 	
 }
 
@@ -218,7 +218,7 @@ glm::vec3 ofCamera::cameraToWorld(glm::vec3 CameraXYZ, const ofRectangle & viewp
 		MVPmatrix = glm::scale(glm::mat4(1.0), glm::vec3(1.f,-1.f,1.f)) * MVPmatrix;
 	}
 	auto world = glm::inverse(MVPmatrix) * glm::vec4(CameraXYZ, 1.0);
-	return world.xyz() / world.w;
+	return glm::vec3(world) / world.w;
 }
 
 //----------------------------------------
